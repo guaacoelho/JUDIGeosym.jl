@@ -201,7 +201,7 @@ def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
 
     damp = model.damp
 
-    rho = model.rho
+    rho = model.irho
 
     C = C_Matrix(model, par)
 
