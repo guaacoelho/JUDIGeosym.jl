@@ -7,7 +7,7 @@ from FD_utils import laplacian, sa_tti
 from utils import D, S, vec, C_Matrix, gather
 
 
-def wave_kernel(model, u, fw=True, q=None, f0=0.015):
+def wave_kernel(model, u, fw=True, q=None, f0=0.015, par='lam-mu'):
     """
     Pde kernel corresponding the the model for the input wavefield
 
@@ -28,7 +28,7 @@ def wave_kernel(model, u, fw=True, q=None, f0=0.015):
     elif model.is_viscoacoustic:
         pde = SLS_2nd_order(model, u, fw=fw, q=q, f0=f0)
     elif model.is_elastic:
-        pde = elastic_kernel(model, u[0], u[1], fw=fw, q=q)
+        pde = elastic_kernel(model, u[0], u[1], fw=fw, q=q, par=par)
     else:
         pde = acoustic_kernel(model, u, fw=fw, q=q)
     return pde

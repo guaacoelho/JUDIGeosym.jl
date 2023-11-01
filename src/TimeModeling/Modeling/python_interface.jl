@@ -62,7 +62,7 @@ function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Arr
     rec_coords = setup_grid(recGeometry, modelPy.shape)
 
     # Devito call
-    return wrapcall_data(ac."forward_rec", modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
+    return wrapcall_data(ac."forward_rec", modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum, par=options.par)
 end
 
 # u = F*Ps'*q
