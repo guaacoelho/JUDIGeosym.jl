@@ -84,7 +84,7 @@ Options structure for seismic modeling.
 
 `f0`: define peak frequency.
 
-`par`: define parameter for the C_Matrix model in elastic_kernel
+`par`: define parametrization for the elastic wave inversion.
 
 Constructor
 ==========

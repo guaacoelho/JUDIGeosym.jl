@@ -7,7 +7,7 @@ from FD_utils import laplacian, sa_tti
 from utils import D, S, vec, C_Matrix, gather
 
 
-def wave_kernel(model, u, fw=True, q=None, f0=0.015, par='lam-mu'):
+def wave_kernel(model, u, par="lam-mu", fw=True, q=None, f0=0.015):
     """
     Pde kernel corresponding the the model for the input wavefield
 
@@ -179,7 +179,7 @@ def tti_kernel(model, u1, u2, fw=True, q=None):
     return [first_stencil, second_stencil] + pdea
 
 
-def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
+def elastic_kernel(model, v, tau, par, fw=True, q=None):
     """
     Elastic wave equation time stepper
 

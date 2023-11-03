@@ -12,10 +12,10 @@ from devito.tools import as_tuple
 
 
 # Forward propagation
-def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
+def forward(model, src_coords, rcv_coords, wavelet, par="lam-mu", space_order=8, save=False,
             qwf=None, return_op=False, freq_list=None, dft_sub=None,
             norm_wf=False, w_fun=None, ws=None, wr=None, t_sub=1, f0=0.015,
-            illum=False, fw=True, par='lam-mu', **kwargs):
+            illum=False, fw=True, **kwargs):
     """
     Low level propagator, to be used through `interface.py`
     Compute forward wavefield u = A(m)^{-1}*f and related quantities (u(xrcv))
