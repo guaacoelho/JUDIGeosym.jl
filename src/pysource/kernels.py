@@ -4,6 +4,7 @@ from sympy import sqrt
 from fields import memory_field
 from fields_exprs import freesurface
 from FD_utils import laplacian, sa_tti
+from utils import D, S, vec, C_Matrix, gather
 
 
 def wave_kernel(model, u, fw=True, q=None, f0=0.015):
@@ -178,7 +179,7 @@ def tti_kernel(model, u1, u2, fw=True, q=None):
     return [first_stencil, second_stencil] + pdea
 
 
-def elastic_kernel(model, v, tau, fw=True, q=None):
+def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
     """
     Elastic wave equation time stepper
 
@@ -197,28 +198,36 @@ def elastic_kernel(model, v, tau, fw=True, q=None):
     """
     if 'nofsdomain' in model.grid.subdomains:
         raise NotImplementedError("Free surface not supported for elastic modelling")
-    if not fw:
-        raise NotImplementedError("Only forward modeling for the elastic equation")
 
-    # Lame parameters
-    lam, b = model.lam, model.irho
-    try:
-        mu = model.mu
-    except AttributeError:
-        mu = 0
+    damp = model.damp
 
-    # Particle velocity
-    eq_v = v.dt - b * div(tau)
-    # Stress
-    try:
-        e = (grad(v.forward) + grad(v.forward).transpose(inner=False))
-    except TypeError:
-        # Older devito version
-        e = (grad(v.forward) + grad(v.forward).T)
+    rho = 1 / model.irho
 
-    eq_tau = tau.dt - lam * diag(div(v.forward)) - mu * e
+    C = C_Matrix(model, par)
 
-    u_v = Eq(v.forward, model.damp * solve(eq_v, v.forward))
-    u_t = Eq(tau.forward, model.damp * solve(eq_tau, tau.forward))
+    tau = vec(tau)
+    if fw:
 
-    return [u_v, u_t]
+        pde_v = rho * v.dt - D(tau)
+        u_v = Eq(v.forward, damp * solve(pde_v, v.forward))
+
+        pde_tau = tau.dt - C * S(v.forward)
+        u_t = Eq(tau.forward, damp * solve(pde_tau, tau.forward))
+
+        return [u_v, u_t]
+
+    else:
+
+        """
+        Implementation of the elastic wave-equation from:
+        1 - Feng and Schuster (2017): Elastic least-squares reverse time migration
+        https://doi.org/10.1190/geo2016-0254.1
+        """
+
+        pde_v = rho * v.dtl - D(C.T*tau)
+        u_v = Eq(v.backward, damp * solve(pde_v, v.backward))
+
+        pde_tau = -tau.dtl + S(v.backward)
+        u_t = Eq(tau.backward, damp * solve(pde_tau, tau.backward))
+
+        return [u_v, u_t]
