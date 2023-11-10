@@ -62,7 +62,7 @@ function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Arr
     rec_coords = setup_grid(recGeometry, modelPy.shape)
 
     # Devito call
-    return wrapcall_data(ac."forward_rec", modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
+    return wrapcall_data(ac."forward_rec", modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum, par=options.par)
 end
 
 # u = F*Ps'*q
@@ -76,7 +76,7 @@ function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Arr
     src_coords = setup_grid(srcGeometry, modelPy.shape)
 
     # Devito call
-    return wrapcall_wf(ac."forward_no_rec", modelPy, src_coords, qIn, fw=fw, space_order=options.space_order, illum=illum)
+    return wrapcall_wf(ac."forward_no_rec", modelPy, src_coords, qIn, fw=fw, space_order=options.space_order, illum=illum, par=options.par)
 end
 
 # d_obs = Pr*F*u
@@ -89,7 +89,7 @@ function devito_interface(modelPy::PyObject, srcGeometry::Nothing, srcData::Arra
     rec_coords = setup_grid(recGeometry, modelPy.shape)
 
     # Devito call
-    return wrapcall_data(ac."forward_wf_src", modelPy, srcData, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
+    return wrapcall_data(ac."forward_wf_src", modelPy, srcData, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum, par=options.par)
 end
 
 # u_out = F*u_in
@@ -99,7 +99,7 @@ function devito_interface(modelPy::PyObject, srcGeometry::Nothing, srcData::Arra
     dtComp = convert(Float32, modelPy."critical_dt")
 
     # Devito call
-    return wrapcall_wf(ac."forward_wf_src_norec", modelPy, srcData, fw=fw, space_order=options.space_order, illum=illum)
+    return wrapcall_wf(ac."forward_wf_src_norec", modelPy, srcData, fw=fw, space_order=options.space_order, illum=illum, par=options.par)
 end
 
 # d_lin = J*dm
@@ -156,7 +156,7 @@ function devito_interface(modelPy::PyObject, weights::Array, srcData::Array, rec
 
     # Devito call
     return wrapcall_data(ac."forward_rec_w", modelPy, weights, qIn, rec_coords,
-                         fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
+                         fw=fw, space_order=options.space_order, f0=options.f0, illum=illum, par=options.par)
 end
 
 # dw = Pw*F'*Pr'*d_obs - adjoint modeling w/ extended source

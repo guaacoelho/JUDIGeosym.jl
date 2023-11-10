@@ -23,6 +23,7 @@ mutable struct JUDIOptions
     return_array::Bool
     dt_comp::Union{Float32, Nothing}
     f0::Float32
+    par::String
 end
 
 """
@@ -83,6 +84,8 @@ Options structure for seismic modeling.
 
 `f0`: define peak frequency.
 
+`par`: define parametrization for the elastic wave inversion.
+
 Constructor
 ==========
 
@@ -96,7 +99,7 @@ All arguments are optional keyword arguments with the following default values:
             num_checkpoints=nothing, checkpoints_maxmem=nothing,
             frequencies=[], isic=false,
             subsampling_factor=1, dft_subsampling_factor=1, return_array=false,
-            dt_comp=nothing, f0=0.015f0)
+            dt_comp=nothing, f0=0.015f0, par="lam-mu")
 
 """
 Options(;space_order=8,
@@ -117,6 +120,7 @@ Options(;space_order=8,
          return_array=false,
          dt_comp=nothing,
          f0=0.015f0,
+         par="lam-mu",
          IC="as") =
 		 JUDIOptions(space_order,
 		 		 free_surface,
@@ -133,7 +137,8 @@ Options(;space_order=8,
 				 dft_subsampling_factor,
                  return_array,
                  dt_comp,
-                 f0)
+                 f0,
+                 par)
 
 JUDIOptions(;kw...) = Options(kw...)
 
