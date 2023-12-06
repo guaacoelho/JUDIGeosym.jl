@@ -185,14 +185,15 @@ def born_op(p_params, tti, visco, elas, space_order, fw, spacing, save, pt_src,
 
 
 @memoized_func
-def adjoint_born_op(p_params, tti, visco, elas, space_order, fw, spacing, pt_rec, fs, w,
-                    save, t_sub, nfreq, dft_sub, ic, illum):
+def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing, pt_rec, fs, w,
+                    save, t_sub, nfreq, dft_sub, ic, illum, par=None):
     """
     Low level gradient operator creation, to be used through `propagators.py`
     Compute the action of the adjoint Jacobian onto a residual J'* δ d.
     """
     info("Building adjoint born operator")
-    model = EmptyModel(tti, visco, elas, spacing, fs, space_order, p_params)
+    # Não vou usar um model vazio, mas sim o modelo elástico passado como parâmetro
+    # model = EmptyModel(tti, visco, elas, spacing, fs, space_order, p_params)
     nt = 10
     ndim = len(spacing)
     residual = np.ones((nt, 1))

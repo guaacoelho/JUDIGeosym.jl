@@ -107,7 +107,8 @@ def gradient(model, residual, rcv_coords, u, return_op=False, space_order=8, fw=
     src, _ = src_rec(model, v, src_coords=rcv_coords, wavelet=residual)
 
     # Create operator and run
-    op = adjoint_born_op(model.physical_parameters, model.is_tti, model.is_viscoacoustic,
+    # passando o model com caracteristicas elásticas como parâmetro
+    op = adjoint_born_op(model, model.physical_parameters, model.is_tti, model.is_viscoacoustic,
                          model.is_elastic, space_order, fw, model.spacing,
                          rcv_coords is not None, model.fs, w, save, t_sub, nfreq(freq),
                          dft_sub, ic, illum)

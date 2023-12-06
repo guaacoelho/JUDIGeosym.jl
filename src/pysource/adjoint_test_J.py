@@ -61,6 +61,17 @@ else:
     model = Model(shape=shape, origin=origin, spacing=spacing, dtype=dtype,
                   fs=args.fs, m=m0, rho=rho0, dm=dm, space_order=so)
 
+
+# Precisei definir esses valores para passar para o model e definir que é o acústico.
+# Se eu definisse valores constantes não seria definido como função e sim como constante, 
+# por isso a definição dos valores 0.5.
+lam = np.ones(shape, dtype=dtype)
+lam[6:] = 0.5
+mu = np.ones(shape, dtype=dtype)
+mu[6:] = 0.5
+model_elas = Model(shape=shape, origin=origin, spacing=spacing, dtype=dtype,
+                fs=args.fs, rho=rho0, dm=dm, mu=mu, lam=lam, space_order=so)
+
 # Time axis
 t0 = 0.
 tn = 2000.
@@ -96,7 +107,8 @@ _, u0, _, _ = forward(model, src.coordinates.data, rec_t.coordinates.data,
 
 # gradient
 print("Adjoint J")
-dm_hat, _, _ = gradient(model, dD_hat, rec_t.coordinates.data, u0, f0=f1, par=par)
+par="lam-mu"
+dm_hat, _, _ = gradient(model_elas, dD_hat, rec_t.coordinates.data, u0, f0=f1, par=par)
 
 a2 = model.critical_dt * inner(dD_hat, dD_hat)
 b2 = inner(dm_hat, model.dm)
