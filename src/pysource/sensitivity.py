@@ -19,7 +19,7 @@ def func_name(freq=None, ic="as"):
         return "%s_%s" % (ic, "freq")
 
 
-def grad_expr(gradm, u, v, model, w=None, freq=None, dft_sub=None, ic="as"):
+def grad_expr(gradm, u, v, model, w=None, freq=None, dft_sub=None, ic="as", par=None, **kwargs):
     """
     Gradient update stencil
 

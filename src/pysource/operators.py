@@ -213,7 +213,7 @@ def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing,
     # Setup gradient wrt m
     gradm = Function(name="gradm", grid=model.grid)
     g_expr = grad_expr(gradm, u, v, model, w=w, freq=freq_list,
-                       dft_sub=dft_sub, ic=ic)
+                       dft_sub=dft_sub, ic=ic, space_order=space_order, par=par) # gradient_update
 
     # Illumination
     Ieq = illumexpr(v, illum)

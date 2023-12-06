@@ -111,7 +111,7 @@ def gradient(model, residual, rcv_coords, u, return_op=False, space_order=8, fw=
     op = adjoint_born_op(model, model.physical_parameters, model.is_tti, model.is_viscoacoustic,
                          model.is_elastic, space_order, fw, model.spacing,
                          rcv_coords is not None, model.fs, w, save, t_sub, nfreq(freq),
-                         dft_sub, ic, illum)
+                         dft_sub, ic, illum, par=par)
 
     # Update kwargs
     kw = base_kwargs(model.critical_dt)
