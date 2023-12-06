@@ -7,7 +7,7 @@ from sensitivity import grad_expr
 from utils import weight_fun, opt_op, fields_kwargs, nfreq, base_kwargs
 from operators import forward_op, born_op, adjoint_born_op
 
-from devito import Operator, Function, Constant
+from devito import Operator, Function, Constant, TensorTimeFunction, VectorTimeFunction
 from devito.tools import as_tuple
 
 
@@ -92,11 +92,16 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
     """
     Low level propagator, to be used through `interface.py`
     Compute the action of the adjoint Jacobian onto a residual J'* δ d.
+
+    Mudar o par = nothing para um valor padrão uma vez que toda a execução será feita usando esse elástico.
     """
     # Setting adjoint wavefieldgradient
     v = wavefield(model, space_order, fw=not fw)
+
+    # Substitui u por u0 pq o u que usarei será o vectorFunction,
+    # esse u0 é usado para outras coisas que não quis mexer agora.
     try:
-        t_sub = as_tuple(u)[0].indices[0]._factor
+        t_sub = as_tuple(u0)[0].indices[0]._factor
     except AttributeError:
         t_sub = 1
 
@@ -122,13 +127,25 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
 
     # Illumination
     I = illumination(v, illum)
+    # Se for utilizar o nosso método elástico, irá adicionar esses elementos ao operador
+    if par:
+        u = VectorTimeFunction(name='u', grid=model.grid, space_order=space_order,
+                           time_order=1)
 
-    kw.update(fields_kwargs(src, u, v, gradm, f0q, f, I))
+        grad1 = Function(name='grad1', grid=model.grid)
+        grad2 = Function(name='grad2', grid=model.grid)
+        grad3 = Function(name='grad3', grid=model.grid)
+        kw.update(fields_kwargs(grad1, grad2, grad3, u))
+    else:
+        kw.update(fields_kwargs(gradm))
+
+    kw.update(fields_kwargs(src, v, f0q, f, I))
     kw.update(model.physical_params())
 
     if return_op:
         return op, gradm, kw
 
+    print(kw)
     summary = op(**kw)
 
     # Output

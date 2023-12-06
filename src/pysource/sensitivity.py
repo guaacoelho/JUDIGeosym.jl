@@ -1,12 +1,13 @@
 import numpy as np
 from sympy import cos, sin
 
-from devito import Eq
+from devito import Eq, TimeFunction, TensorTimeFunction, Function
 from devito.tools import as_tuple
 
 from fields import frequencies
 from fields_exprs import sub_time, freesurface
 from FD_utils import divs, grads
+from utils import gather, S, vec, C_Matrix
 
 
 def func_name(freq=None, ic="as"):
@@ -40,16 +41,88 @@ def grad_expr(gradm, u, v, model, w=None, freq=None, dft_sub=None, ic="as", par=
     isic: Bool
         Whether or not to use inverse scattering imaging condition (not supported yet)
     """
-    ic_func = ic_dict[func_name(freq=freq, ic=ic)]
-    expr = ic_func(as_tuple(u), as_tuple(v), model, freq=freq, factor=dft_sub, w=w)
-    if model.fs and ic in ["fwi", "isic"]:
-        # Only need `fs` processing for isic for the spatial derivatives.
-        eq_g = [Eq(gradm, gradm - expr, subdomain=model.grid.subdomains['nofsdomain'])]
-        eq_g += freesurface(model, eq_g)
+    if par == None:
+        ic_func = ic_dict[func_name(freq=freq, ic=ic)]
+        expr = ic_func(as_tuple(u), as_tuple(v), model, freq=freq, factor=dft_sub, w=w)
+        if model.fs and ic in ["fwi", "isic"]:
+            # Only need `fs` processing for isic for the spatial derivatives.
+            eq_g = [Eq(gradm, gradm - expr, subdomain=model.grid.subdomains['nofsdomain'])]
+            eq_g += freesurface(model, eq_g)
+        else:
+            eq_g = [Eq(gradm, gradm - expr)]
+        return eq_g
     else:
-        eq_g = [Eq(gradm, gradm - expr)]
-    return eq_g
+        # se possuir o valor de par então é o nosso elástico
+        return elastic_grad(model, u, v, par, **kwargs)
 
+def elastic_grad(model, u, v, par, **kwargs):
+    # Definição das equações de atualização do gradiente
+
+    sig = v[1]
+    v = v[0]
+    
+    space_order = kwargs.get("space_order")
+
+    C = C_Matrix(model, par)
+
+    # sig = TensorTimeFunction(name='sig', grid=model.grid, space_order=space_order,
+    #                          time_order=1)
+    print(type(sig))
+    sig = vec(sig)
+    grad1 = Function(name='grad1', grid=model.grid)
+    grad2 = Function(name='grad2', grid=model.grid)
+    grad3 = Function(name='grad3', grid=model.grid)
+
+
+    if par=="lam-mu":
+        hl = TimeFunction(name='hl', grid=model.grid, space_order=space_order,
+                      time_order=1)
+        hm = TimeFunction(name='hm', grid=model.grid, space_order=space_order,
+                        time_order=1)
+        hr = TimeFunction(name='hr', grid=model.grid, space_order=space_order,
+                        time_order=1)
+
+        Wl = gather(0, C.dlam * S(v))
+        Wm = gather(0, C.dmu * S(v))
+        Wr = gather(v.dt, 0)
+
+        W2 = gather(u, sig)
+
+        wl_update = Eq(hl, Wl.T * W2)
+        gradient_lam = Eq(grad1, grad1 + hl)
+
+        wm_update = Eq(hm, Wm.T * W2)
+        gradient_mu = Eq(grad2, grad2 + hm)
+
+        wr_update = Eq(hr, Wr.T * W2)
+        gradient_rho = Eq(grad3, grad3 - hr)
+
+        return [wl_update, gradient_lam, wm_update, gradient_mu, wr_update, gradient_rho]
+    elif par=="vp-vs-rho":
+       
+        hvp = TimeFunction(name='hvp', grid=model.grid, space_order=space_order,
+                       time_order=1)
+        hvs = TimeFunction(name='hvs', grid=model.grid, space_order=space_order,
+                            time_order=1)
+        hr = TimeFunction(name='hr', grid=model.grid, space_order=space_order,
+                            time_order=1)
+
+        Wvp = gather(0, C.dvp * S(v))
+        Wvs = gather(0, C.dvs * S(v))
+        Wr = gather(v.dt, - C.drho * S(v))
+
+        W2 = gather(u, sig)
+
+        wvp_update = Eq(hvp, Wvp.T * W2)
+        gradient_vp = Eq(grad1, grad1 + hvp)
+
+        wvs_update = Eq(hvs, Wvs.T * W2)
+        gradient_vs = Eq(grad2, grad2 + hvs)
+
+        wr_update = Eq(hr, Wr.T * W2)
+        gradient_rho = Eq(grad3, grad3 - hr)
+
+        return [wvp_update, gradient_vp, wvs_update, gradient_vs, wr_update, gradient_rho]
 
 def crosscorr_time(u, v, model, **kwargs):
     """

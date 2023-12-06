@@ -2,7 +2,7 @@ import numpy as np
 from collections.abc import Hashable
 from functools import partial
 
-from devito import Constant, Operator, Function, info
+from devito import Constant, Operator, Function, info, VectorTimeFunction
 
 from models import EmptyModel
 from kernels import wave_kernel
@@ -201,15 +201,23 @@ def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing,
     freq_list = np.ones((nfreq,)) if nfreq > 0 else None
     # Setting adjoint wavefieldgradient
     v = wavefield(model, space_order, fw=not fw)
-    u = forward_wavefield(model, space_order, save=save, nt=nt,
-                          dft=nfreq > 0, t_sub=t_sub, fw=fw)
+
+    u = VectorTimeFunction(name='u', grid=model.grid, space_order=space_order,
+                           time_order=1)
 
     # Set up PDE expression and rearrange
-    pde = wave_kernel(model, v, fw=False, f0=Constant('f0'))
+    pde = wave_kernel(model, v, fw=False, f0=Constant('f0')) # elastic_stencil
 
     # Setup source and receiver
+    # rec_expr
     r_expr = geom_expr(model, v, src_coords=rcords, wavelet=residual, fw=not fw)
-
+    
+    # Construct expression to inject receiver values
+    # rec_term_vx = rec_vx.inject(field=u[0].backward, expr=s*rec_vx*(1/rho))
+    # rec_term_vz = rec_vz.inject(field=u[-1].backward, expr=s*rec_vz*(1/rho))
+    # r_expr = rec_term_vx + rec_term_vz
+    # if model.grid.dim == 3:
+    #     r_expr += rec_vy.inject(field=u[1].backward, expr=s*rec_vy*(1/rho))
     # Setup gradient wrt m
     gradm = Function(name="gradm", grid=model.grid)
     g_expr = grad_expr(gradm, u, v, model, w=w, freq=freq_list,
@@ -220,8 +228,9 @@ def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing,
 
     # Create operator and run
     subs = model.spacing_map
-    op = Operator(pde + r_expr + g_expr + Ieq, subs=subs, name="gradient"+name(model),
-                  opt=opt_op(model))
+    op = Operator(pde + r_expr + g_expr, subs=subs, name="gradient"+name(model))
+    # op = Operator(pde + r_expr + g_expr + Ieq, subs=subs, name="gradient"+name(model),
+    #               opt=opt_op(model))
     try:
         op.cfunction
     except:
