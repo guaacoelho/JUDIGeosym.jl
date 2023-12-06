@@ -104,7 +104,9 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
     gradm = Function(name="gradm", grid=model.grid)
 
     # Setup source and receiver
-    src, _ = src_rec(model, v, src_coords=rcv_coords, wavelet=residual)
+    # Mandei o residual.data ao invés de residual para corrigir o problema
+    # que ocorria quando passava residual como PointSource já pronto.
+    src, _ = src_rec(model, v, src_coords=rcv_coords, wavelet=residual.data)
 
     # Create operator and run
     # passando o model com caracteristicas elásticas como parâmetro
