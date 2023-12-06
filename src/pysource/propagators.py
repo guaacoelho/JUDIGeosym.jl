@@ -87,8 +87,8 @@ def adjoint(*args, **kwargs):
     return forward(*args, fw=fw, **kwargs)
 
 
-def gradient(model, residual, rcv_coords, u, return_op=False, space_order=8, fw=True,
-             w=None, freq=None, dft_sub=None, ic="as", f0=0.015, save=True, illum=False):
+def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw=True,
+             w=None, freq=None, dft_sub=None, ic="as", f0=0.015, save=True, illum=False, par=None):
     """
     Low level propagator, to be used through `interface.py`
     Compute the action of the adjoint Jacobian onto a residual J'* δ d.
