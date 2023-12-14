@@ -100,7 +100,7 @@ dD_hat, u0l, _, _ = born(model, src.coordinates.data, rec_t.coordinates.data,
 #                       src.data, save=True, ws=weights)
 # Forward
 print("Forward")
-_, u0, _, _ = forward(model, src.coordinates.data, rec_t.coordinates.data,
+rout, u0, _, _ = forward(model_elas, src.coordinates.data, rec_t.coordinates.data,
                    src.data, save=True, f0=f1)
 # _, u0, _ = forward(model, None, rec_t.coordinates.data,
 #                    src.data, save=True, ws=weights)
