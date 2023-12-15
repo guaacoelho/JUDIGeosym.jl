@@ -87,8 +87,8 @@ def adjoint(*args, **kwargs):
     return forward(*args, fw=fw, **kwargs)
 
 
-def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw=True,
-             w=None, freq=None, dft_sub=None, ic="as", f0=0.015, save=True, illum=False, par=None):
+def gradient(model, rec_vx, rec_vz, residual, rcv_coords, v, return_op=False, space_order=8, fw=True,
+             w=None, freq=None, dft_sub=None, ic="as", f0=0.015, save=True, illum=False, rec_vy=None, par=None):
     """
     Low level propagator, to be used through `interface.py`
     Compute the action of the adjoint Jacobian onto a residual J'* δ d.
@@ -98,10 +98,9 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
     # Setting adjoint wavefieldgradient
     v = wavefield(model, space_order, fw=not fw)
 
-    # Substitui u por u0 pq o u que usarei será o vectorFunction,
-    # esse u0 é usado para outras coisas que não quis mexer agora.
+    # Substitui u por v pq o u que usarei será o vectorFunction,
     try:
-        t_sub = as_tuple(u0)[0].indices[0]._factor
+        t_sub = as_tuple(v)[0].indices[0]._factor
     except AttributeError:
         t_sub = 1
 
@@ -111,7 +110,7 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
     # Setup source and receiver
     # Mandei o residual.data ao invés de residual para corrigir o problema
     # que ocorria quando passava residual como PointSource já pronto.
-    src, _ = src_rec(model, v, src_coords=rcv_coords, wavelet=residual.data)
+    src, _ = src_rec(model, v, src_coords=rcv_coords, wavelet=residual)
 
     # Create operator and run
     # passando o model com caracteristicas elásticas como parâmetro
@@ -135,11 +134,14 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
         grad1 = Function(name='grad1', grid=model.grid)
         grad2 = Function(name='grad2', grid=model.grid)
         grad3 = Function(name='grad3', grid=model.grid)
-        kw.update(fields_kwargs(grad1, grad2, grad3, u))
+        kw.update(fields_kwargs(v, grad1, grad2, grad3, u, rec_vx, rec_vz))
+        if model.grid.dim == 3:
+            kw.update(fields_kwargs(rec_vy))
+        # add um if para verificar se é 3D e nesse caso adicionar o rec_vy
     else:
-        kw.update(fields_kwargs(gradm))
+        kw.update(fields_kwargs(gradm, src))
 
-    kw.update(fields_kwargs(src, v, f0q, f, I))
+    kw.update(fields_kwargs(f0q, f, I))
     kw.update(model.physical_params())
 
     if return_op:
@@ -149,6 +151,8 @@ def gradient(model, residual, rcv_coords, u0, return_op=False, space_order=8, fw
     summary = op(**kw)
 
     # Output
+    if par:
+        return grad1, grad2, grad3, I, summary
     return gradm, I, summary
 
 

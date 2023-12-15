@@ -3,6 +3,7 @@ from collections.abc import Hashable
 from functools import partial
 
 from devito import Constant, Operator, Function, info, VectorTimeFunction
+from sources import Receiver
 
 from models import EmptyModel
 from kernels import wave_kernel
@@ -210,14 +211,26 @@ def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing,
 
     # Setup source and receiver
     # rec_expr
-    r_expr = geom_expr(model, v, src_coords=rcords, wavelet=residual, fw=not fw)
+    # r_expr = geom_expr(model, v, src_coords=rcords, wavelet=residual, fw=not fw)
+    
+    s = model.grid.time_dim.spacing
+
+    rec_vx = Receiver(name="rec_vx", grid=model.grid, ntime=nt,
+                       coordinates=rcords)
+    rec_vz = Receiver(name="rec_vz", grid=model.grid, ntime=nt,
+                       coordinates=rcords)
+    if model.grid.dim == 3:
+        rec_vy = Receiver(name="rec_vy", grid=model.grid, ntime=nt,
+                        coordinates=rcords)
     
     # Construct expression to inject receiver values
-    # rec_term_vx = rec_vx.inject(field=u[0].backward, expr=s*rec_vx*(1/rho))
-    # rec_term_vz = rec_vz.inject(field=u[-1].backward, expr=s*rec_vz*(1/rho))
-    # r_expr = rec_term_vx + rec_term_vz
-    # if model.grid.dim == 3:
-    #     r_expr += rec_vy.inject(field=u[1].backward, expr=s*rec_vy*(1/rho))
+    rec_term_vx = rec_vx.inject(field=u[0].backward, expr=s*rec_vx*model.irho)
+    rec_term_vz = rec_vz.inject(field=u[-1].backward, expr=s*rec_vz*model.irho)
+    r_expr = rec_term_vx + rec_term_vz
+    if model.grid.dim == 3:
+        r_expr += rec_vy.inject(field=u[1].backward, expr=s*rec_vy*model.irho)
+
+
     # Setup gradient wrt m
     gradm = Function(name="gradm", grid=model.grid)
     g_expr = grad_expr(gradm, u, v, model, w=w, freq=freq_list,

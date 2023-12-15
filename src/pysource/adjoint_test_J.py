@@ -92,6 +92,14 @@ rec_t = Receiver(name='rec_t', grid=model.grid, npoint=301, ntime=nt)
 rec_t.coordinates.data[:, 0] = np.linspace(0., 3000., num=301)
 rec_t.coordinates.data[:, 1] = 20.
 
+rec_vx = Receiver(name='rec_vx', grid=model.grid, npoint=301, ntime=nt)
+rec_vx.coordinates.data[:, 0] = np.linspace(0., 3000., num=301)
+rec_vx.coordinates.data[:, 1] = 20.
+
+rec_vz = Receiver(name='rec_vz', grid=model.grid, npoint=301, ntime=nt)
+rec_vz.coordinates.data[:, 0] = np.linspace(0., 3000., num=301)
+rec_vz.coordinates.data[:, 1] = 20.
+
 # Linearized data
 print("Forward J")
 dD_hat, u0l, _, _ = born(model, src.coordinates.data, rec_t.coordinates.data,
@@ -108,16 +116,10 @@ rout, u0, _, _ = forward(model_elas, src.coordinates.data, rec_t.coordinates.dat
 # gradient
 print("Adjoint J")
 par="lam-mu"
-dm_hat, _, _ = gradient(model_elas, dD_hat, rec_t.coordinates.data, u0, f0=f1, par=par)
+grad1, grad2, grad3, _, _ = gradient(model_elas, rec_vx, rec_vz, dD_hat.data, rec_t.coordinates.data, u0[0], f0=f1, par=par)
 
-a2 = model.critical_dt * inner(dD_hat, dD_hat)
-b2 = inner(dm_hat, model.dm)
-if is_tti:
-    c = np.linalg.norm(u0[0].data.flatten() - u0l[0].data.flatten(), np.inf)
-else:
-    c = np.linalg.norm(u0.data.flatten() - u0l.data.flatten(), np.inf)
 
-print("Difference between saving with forward and born", c)
-print("Adjoint test J")
-print("a = %2.5e, b = %2.5e, ratio = %2.5e, diff = %2.5e, rerr=%2.5e" %
-      (a2, b2, b2/a2, a2 - b2, (a2-b2)/(a2+b2)))
+print(np.max(grad1.data))
+print(np.max(grad2.data))
+print(np.max(grad3.data))
+
