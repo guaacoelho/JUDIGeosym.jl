@@ -7,7 +7,7 @@ from FD_utils import laplacian, sa_tti
 from utils import D, S, vec, C_Matrix, gather
 
 
-def wave_kernel(model, u, fw=True, q=None, f0=0.015):
+def wave_kernel(model, u, fw=True, q=None, f0=0.015, u_el=None):
     """
     Pde kernel corresponding the the model for the input wavefield
 
@@ -22,13 +22,14 @@ def wave_kernel(model, u, fw=True, q=None, f0=0.015):
     q : TimeFunction or Expr
         Full time-space source
     f0 : Peak frequency
+    u_el : u para o caso elástico
     """
     if model.is_tti:
         pde = tti_kernel(model, u[0], u[1], fw=fw, q=q)
     elif model.is_viscoacoustic:
         pde = SLS_2nd_order(model, u, fw=fw, q=q, f0=f0)
     elif model.is_elastic:
-        pde = elastic_kernel(model, u[0], u[1], fw=fw, q=q)
+        pde = elastic_kernel(model, u[0], u[1], fw=fw, q=q, u_el=u_el)
     else:
         pde = acoustic_kernel(model, u, fw=fw, q=q)
     return pde
@@ -179,7 +180,7 @@ def tti_kernel(model, u1, u2, fw=True, q=None):
     return [first_stencil, second_stencil] + pdea
 
 
-def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
+def elastic_kernel(model, v, tau, fw=True, q=None, u_el=None, par='lam-mu'):
     """
     Elastic wave equation time stepper
 
@@ -195,6 +196,7 @@ def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
         Whether forward or backward in time propagation
     q : TimeFunction or Expr
         Full time-space source as a tuple (one value for each component)
+    u_el : É o vector com nome u que deve ser utilizado ao invés de v (mantém igual ao DEVITO)
     """
     if 'nofsdomain' in model.grid.subdomains:
         raise NotImplementedError("Free surface not supported for elastic modelling")
@@ -224,10 +226,10 @@ def elastic_kernel(model, v, tau, fw=True, q=None, par='lam-mu'):
         https://doi.org/10.1190/geo2016-0254.1
         """
 
-        pde_v = rho * v.dtl - D(C.T*tau)
-        u_v = Eq(v.backward, damp * solve(pde_v, v.backward))
+        pde_v = rho * u_el.dtl - D(C.T*tau)
+        u_v = Eq(u_el.backward, damp * solve(pde_v, u_el.backward))
 
-        pde_tau = -tau.dtl + S(v.backward)
+        pde_tau = -tau.dtl + S(u_el.backward)
         u_t = Eq(tau.backward, damp * solve(pde_tau, tau.backward))
 
         return [u_v, u_t]

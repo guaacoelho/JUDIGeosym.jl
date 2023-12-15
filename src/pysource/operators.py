@@ -207,7 +207,7 @@ def adjoint_born_op(model, p_params, tti, visco, elas, space_order, fw, spacing,
                            time_order=1)
 
     # Set up PDE expression and rearrange
-    pde = wave_kernel(model, v, fw=False, f0=Constant('f0')) # elastic_stencil
+    pde = wave_kernel(model, v, fw=False, f0=Constant('f0'), u_el=u) # elastic_stencil
 
     # Setup source and receiver
     # rec_expr
