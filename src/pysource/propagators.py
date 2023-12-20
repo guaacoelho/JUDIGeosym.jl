@@ -9,6 +9,7 @@ from operators import forward_op, born_op, adjoint_born_op
 
 from devito import Operator, Function, Constant
 from devito.tools import as_tuple
+from sources import Receiver
 
 
 # Forward propagation
@@ -22,62 +23,56 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     """
     # Number of time steps
     nt = as_tuple(qwf)[0].shape[0] if wavelet is None else wavelet.shape[0]
-
+    print("is elastic? {}".format(model.is_elastic))
     # Setting forward wavefield
     u = wavefield(model, space_order, save=save, nt=nt, t_sub=t_sub, fw=fw)
 
     # Setup source and receiver
     src, rcv = src_rec(model, u, src_coords, rcv_coords, wavelet, nt)
 
-    # Wavefield norm
-    nv_weights = weight_fun(w_fun, model, src_coords) if norm_wf else None
-
     # Create operator and run
     op = forward_op(model.physical_parameters, model.is_tti, model.is_viscoacoustic,
                     model.is_elastic, space_order, fw, model.spacing, save,
-                    t_sub, model.fs, src_coords is not None, rcv_coords is not None,
-                    nfreq(freq_list), dft_sub, ws is not None,
-                    wr is not None, qwf is not None, nv_weights, illum)
+                    t_sub, model.fs, src_coords is not None, rcv_coords is not None)
 
+        # Illumination
+    I = illumination(u, illum)
+    
     # Make kwargs
     kw = base_kwargs(model.critical_dt)
-    f0q = Constant('f0', value=f0) if model.is_viscoacoustic else None
-
-    # Expression for saving wavefield if time subsampling is used
-    u_save = wavefield_subsampled(model, u, nt, t_sub, space_order=space_order)
-
-    # Illumination
-    I = illumination(u, illum)
-
-    # On-the-fly Fourier
-    dft_modes, fr = fourier_modes(u, freq_list)
-
-    # Extended source
-    ws, wst = lr_src_fields(model, ws, wavelet)
-
-    # Extended receiver
-    wr, wrt = lr_src_fields(model, None, wr, empty_w=True, rec=True)
-
-    # Norm v
-    nv2, nvt2 = norm_holder(u) if norm_wf else (None, None)
 
     # Update kwargs
-    fields = fields_kwargs(u, qwf, src, rcv, u_save, dft_modes, fr, ws, wst,
-                           wr, wrt, nv2, nvt2, f0q, I)
+    fields = fields_kwargs(u, src, rcv, I)
+
     kw.update(fields)
     kw.update(model.physical_params())
-
+    
+    if model.is_elastic:
+        rec_vx = Receiver(name="rec_vx", grid=model.grid, ntime=nt,
+                          coordinates=rcv_coords)
+        rec_vz = Receiver(name="rec_vz", grid=model.grid, ntime=nt,
+                          coordinates=rcv_coords)
+        kw.update(fields_kwargs(rec_vx, rec_vz))
+        if model.grid.dim == 3:
+                rec_vy = Receiver(name="rec_vy", grid=model.grid, ntime=nt,
+                                  coordinates=rcv_coords)
+                kw.update(fields_kwargs(rec_vy))
+    print("kw: ")
+    print(kw)
     # Output
-    rout = wr or rcv
-    uout = dft_modes or (u_save if t_sub > 1 else u)
+    rout = rcv
+    uout = u
 
     if return_op:
         return op, uout, rout, kw
 
     summary = op(**kw)
-
-    if norm_wf:
-        return rout, uout, nv2.data[0], I, summary
+    # if norm_wf:
+    #     return rout, uout, nv2.data[0], I, summary
+    if model.is_elastic:
+        if model.grid.dim == 3:
+            return (rout, rec_vx, rec_vz, rec_vy), uout, I, summary
+        return (rout, rec_vx, rec_vz), uout, I, summary
     return rout, uout, I, summary
 
 
