@@ -62,3 +62,20 @@ q = judiVector(srcGeometry, wavelet)
 
 # Nonlinear modeling
 dobs = F*q
+for d in dobs
+    # print("typeof(dobs): ")
+    # print(typeof(dobs))
+    maximo = maximum(d.data[1])
+    minimo = minimum(d.data[1])
+    print("\n\n\nFinal")
+    print("Maximo: ")
+    print(maximo)
+    print("\nMinimo: ")
+    print(minimo)
+    print("\ndobs[1][200]: ")
+    print(d.data[1][200])
+    print("\ndobs[1][500]: ")
+    print(d.data[1][500])
+    print("************** final ***************\n\n")
+end
+# print(dobs.data)

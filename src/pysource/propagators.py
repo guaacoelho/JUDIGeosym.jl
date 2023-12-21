@@ -23,7 +23,7 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     """
     # Number of time steps
     nt = as_tuple(qwf)[0].shape[0] if wavelet is None else wavelet.shape[0]
-    print("is elastic? {}".format(model.is_elastic))
+
     # Setting forward wavefield
     u = wavefield(model, space_order, save=save, nt=nt, t_sub=t_sub, fw=fw)
 
@@ -57,23 +57,22 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
                 rec_vy = Receiver(name="rec_vy", grid=model.grid, ntime=nt,
                                   coordinates=rcv_coords)
                 kw.update(fields_kwargs(rec_vy))
-    print("kw: ")
-    print(kw)
+
     # Output
-    rout = rcv
+    rec_tau = rcv
     uout = u
 
     if return_op:
-        return op, uout, rout, kw
+        return op, uout, rec_tau, kw
 
     summary = op(**kw)
     # if norm_wf:
     #     return rout, uout, nv2.data[0], I, summary
     if model.is_elastic:
         if model.grid.dim == 3:
-            return (rout, rec_vx, rec_vz, rec_vy), uout, I, summary
-        return (rout, rec_vx, rec_vz), uout, I, summary
-    return rout, uout, I, summary
+            return (rec_tau, rec_vx, rec_vz, rec_vy), uout, I, summary
+        return (rec_tau, rec_vx, rec_vz), uout, I, summary
+    return rec_tau, uout, I, summary
 
 
 # legacy
