@@ -25,24 +25,15 @@ function _outtype_isoelastic(b::Bool, n::Integer, type)
     end
 end
 
-function wrapcall_data_isoelastic(func, dim, args...;kw...)
-    nret = dim + 1 
-    # rtype = Tuple{Vararg{PyArray, nret}}
+function wrapcall_data_isoelastic(func, dim, args...;kw...) 
+
     rtype = _outtype_isoelastic(get(kw, :illum, nothing), dim, PyArray)
-    print("rtype: ")
-    print(rtype)
     out = rlock_pycall(func, rtype, args...;kw...)
 
     # tup = isa(out, Tuple)
     # The returned array `out` is a Python Row-Major array with dimension (time, rec).
     # Unlike standard array we want to keep this ordering in julia (time first) so we need to
     # make a wrapper around the pointer, to flip the dimension the re-permute the dimensions.
-    # print("out[1]: ")
-    # print(typeof(out[1]))
-    # print("out[2]: ")
-    # print(typeof(out[2]))
-    # print("out[3]: ")
-    # print(typeof(out[3]))
     shot1 = out[1]
     shot1 = PermutedDimsArray(unsafe_wrap(Array, shot1.data, reverse(size(shot1))), length(size(shot1)):-1:1)
     shot2 = out[2]
@@ -52,8 +43,6 @@ function wrapcall_data_isoelastic(func, dim, args...;kw...)
     
     # Check what to return
     out = (shot1, shot2, shot3)
-    # print("typeof(out)")
-    # print(typeof(out))
     return out
 end
 
@@ -69,6 +58,12 @@ function wrapcall_data(func, args...;kw...)
     shot = PermutedDimsArray(unsafe_wrap(Array, shot.data, reverse(size(shot))), length(size(shot)):-1:1)
     # Check what to return
     out = tup ? (shot, out[2]) : shot
+    # print("\nPrint dentro wrap depois shot")
+    # print("\nout: ")
+    # print(typeof(out))
+    # print("\nout[1]: ")
+    # print(typeof(out[1]))
+
     return out
 end
 

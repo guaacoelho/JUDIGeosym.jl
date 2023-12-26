@@ -45,9 +45,6 @@ function time_modeling(model_full::AbstractModel, srcGeometry::GeomOrNot, srcDat
     @juditime "Propagation" begin
         argout = devito_interface(modelPy, srcGeometry, srcData, recGeometry, recData, dm, options, illum, fw)
     end
-    print("ARGOUT: ")
-    print(typeof(argout))
-    print("\n\n")
     @juditime "Filter empty output" begin
         argout = filter_none(argout)
     end
@@ -57,13 +54,7 @@ function time_modeling(model_full::AbstractModel, srcGeometry::GeomOrNot, srcDat
     else
         argout = post_process(argout, modelPy, Val(op), recGeometry, options)
     end
-    print("ARGOUT2: ")
-    print(typeof(argout))
-    print("\n\n")
     argout = save_to_disk(argout, srcGeometry, srcData, options, Val(fw), Val(options.save_data_to_disk))
-    print("ARGOUT3: ")
-    print(typeof(argout))
-    print("\n\n")
     return argout
 end
 
@@ -91,19 +82,11 @@ end
 post_process(v::AbstractArray{T}, modelPy::PyObject, ::Val{:born}, G::Geometry{T}, options::JUDIOptions) where {T<:Number} = judiVector{T, Matrix{T}}(1, G, [time_resample(v, calculate_dt(modelPy), G)])
 
 function post_process_isoelastic(t::Tuple, modelPy::PyObject, op::Val, G, o::JUDIOptions)
-    print("entrou\n")
-    print("lenght(tuple): ")
-    print(length(t))
-    print("\n")
     n_elem = modelPy.dim + 1
     ret_tuple = ()
     for i in 1:n_elem
-        print("i: ")
-        print(i)
-        print("\n")
         ret_tuple = (ret_tuple..., post_process(t[i], modelPy, op, G, o)) 
     end
-    print("saiu")
     return ret_tuple
 end
 # Saving to disk utilities
