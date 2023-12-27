@@ -45,24 +45,30 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
     """
     rec, _, I, _ = forward(model, src_coords, rec_coords, wavelet, save=False,
                            space_order=space_order, f0=f0, illum=illum, fw=fw)
-    
-    rec = (rec[0].data, rec[1].data, rec[2].data)
-    # print("rec_tau: {}".format(rec[0].data))
-    # print("rec_y: {}".format(rec[1].data))
-    # print("rec_z: {}".format(rec[2].data))
-    # rec_final = np.concatenate((rec[0].data, rec[1].data, rec[2].data))
 
-    # maximo = np.max(rec_final)
-    # minimo = np.min(rec_final)
-    # norma = np.linalg.norm(rec_final)
-    # print("Maximo: ")
-    # print(maximo)
-    # print("Minimo: ")
-    # print(minimo)
-    # print("Norm: ")
-    # print(norma)
+    for d in rec:
+        print("\n************** começo ***************\n\n")
+        # print("typeof(dobs): ")
+        # print(type(dobs))
+        maximo = np.max(d.data)
+        minimo = np.min(d.data)
+        norma = np.linalg.norm(d.data)
+        print("Maximo: ")
+        print(maximo)
+        print("Minimo: ")
+        print(minimo)
+        print("Norma: ")
+        print(norma)
+        
+        # print("\ndobs[1][200]: ")
+        # print(d.data[1][200])
+        # print("\ndobs[1][500]: ")
+        # print(d.data[1][500])
+        print("\n************** final ***************\n\n")
 
-    return rec
+    rec_out = (rec[0].data, rec[1].data, rec[2].data)
+
+    return rec_out
     # return rec[0].data, getattr(I, "data", None)
 
 

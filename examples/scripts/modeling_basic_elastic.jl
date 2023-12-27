@@ -5,7 +5,7 @@
 #
 
 using JUDI
-
+using LinearAlgebra
 # Set up model structure
 n = (120, 100)    # (x,y,z) or (x,z)
 d = (10., 10.)
@@ -56,26 +56,29 @@ wavelet = ricker_wavelet(timeS, dtS, f0)
 
 ###################################################################################################
 
-# Setup operators
+# Setup operators'
 F = judiModeling(model, srcGeometry, recGeometry)
 q = judiVector(srcGeometry, wavelet)
 
 # Nonlinear modeling
-dobs = F*q
+dobs = F*q'
+print("***************************************\n")
+print("***************************************\n")
+print("***************************************\n")
+print("****************************************\n")
 for d in dobs
+     print("\n************** começo ***************\n\n")
     # print("typeof(dobs): ")
     # print(typeof(dobs))
     maximo = maximum(d.data[1])
     minimo = minimum(d.data[1])
-    print("\n\n\nFinal")
+    norma = norm(d.data[1])
     print("Maximo: ")
     print(maximo)
     print("\nMinimo: ")
     print(minimo)
-    print("\ndobs[1][200]: ")
-    print(d.data[1][200])
-    print("\ndobs[1][500]: ")
-    print(d.data[1][500])
-    print("************** final ***************\n\n")
+    print("\nNorma: ")
+    print(norma)
+    print("\n************** final ***************\n\n")
 end
 # print(dobs.data)
