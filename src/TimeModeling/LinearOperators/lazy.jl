@@ -18,6 +18,12 @@ struct judiProjection{D} <: judiNoopOperator{D}
     geometry::Geometry
 end
 
+# Multi Components Projection operator 
+struct judiProjectionMC{D} <: judiNoopOperator{D}
+    j_proj_p::judiProjection
+    j_proj_v::judiProjection
+end
+
 # Wavelet "projection"
 struct judiWavelet{D} <: judiNoopOperator{D}
     m::AbstractSize
@@ -28,7 +34,7 @@ end
 
 # Poorly named backward compat
 const judiLRWF{T} = judiWavelet{T}
-const Projection{D} = Union{judiProjection{D}, judiWavelet{D}}
+const Projection{D} = Union{judiProjection{D}, judiWavelet{D}, judiProjectionMC{D}}
 const AdjointProjection{D} = jAdjoint{<:Projection{D}}
 
 """
@@ -92,6 +98,14 @@ Examples
     qad = Ps*F'*Pr'*dobs
 """
 judiProjection(G::Geometry) = judiProjection{Float32}(rec_space(G), time_space_src(get_nsrc(G), G.nt, 3), G)
+
+function judiProjection(G::GeometryMC) 
+    
+    j_proj_p = judiProjection{Float32}(rec_space(G.rec_p), time_space_src(get_nsrc(G.rec_p), G.rec_p.nt, 3), G.rec_p)
+    j_proj_v = judiProjection{Float32}(rec_space(G.rec_v), time_space_src(get_nsrc(G.rec_v), G.rec_v.nt, 3), G.rec_v)
+
+    return judiProjectionMC{Float32}(j_proj_p, j_proj_v)
+end
 
 """
     judiWavelet(dt, wavelet)
