@@ -67,6 +67,15 @@ struct judiDataSourceModeling{D, O} <: judiComposedPropagator{D, O}
         update_size(qInjection, F)
         new(rInterpolation.m, qInjection.n, rInterpolation, F, qInjection)
     end
+    function judiDataSourceModeling{D, O}(rInterpolation::judiProjectionMC{D}, F::judiModeling{D, O}, qInjection::AdjointProjection{D}) where {D, O}
+        ts = time_space_src(get_nsrc(rInterpolation.j_proj_p), get_nt(rInterpolation.j_proj_p), size(F.model))
+        merge!(F.n, ts)
+        merge!(F.m, ts)
+        update_size(rInterpolation.j_proj_p, F)
+        update_size(rInterpolation.j_proj_v, F)
+        update_size(qInjection, F)
+        new(rInterpolation.j_proj_p.m, qInjection.n, rInterpolation, F, qInjection)
+    end
 end
 
 struct judiJacobian{D, O, FT} <: judiAbstractJacobian{D, O, FT}
