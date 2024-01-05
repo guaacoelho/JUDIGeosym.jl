@@ -1,4 +1,4 @@
-export judiProjection, judiWavelet, judiLRWF, judiRHS
+export judiProjection, judiPropagatorMC, judiWavelet, judiLRWF, judiRHS
 
 ############################################################################################################################
 # Abstract types
