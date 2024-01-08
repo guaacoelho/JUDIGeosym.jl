@@ -388,7 +388,16 @@ function getindex(geometry::GeometryIC{T}, srcnum::RangeOrVec) where T
     return geometry
 end
 
+# getindex multi-components geometry structure
+function getindex(geometry::GeometryMC{T}, srcnum::RangeOrVec) where T
+    rec_p = geometry.rec_p[srcnum]
+    rec_v = geometry.rec_v[srcnum]
+    geometry = GeometryMC{T}(rec_p, rec_v)
+    return geometry
+end
+
 getindex(geometry::GeometryIC{T}, srcnum::Integer) where T = getindex(geometry, srcnum:srcnum)
+getindex(geometry::GeometryMC{T}, srcnum::Integer) where T = getindex(geometry, srcnum:srcnum)
 
 # getindex out-of-core geometry structure
 getindex(geometry::GeometryOOC, srcnum) = Geometry(geometry.container[srcnum]; key=geometry.key, segy_depth_key=geometry.segy_depth_key, dt=geometry.dt[srcnum], t=geometry.t[srcnum])
