@@ -52,11 +52,17 @@ zrec_v = range(400f0, 400f0, length=nxrec)
 timeR = 1500f0   # receiver recording time [ms]
 dtR = 1.5f0    # receiver sampling interval
 
-# Set up receiver structure
-recpGeometry = Geometry(xrec_p, yrec_p, zrec_p; dt=dtR, t=timeR, nsrc=nsrc)
-recvGeometry = Geometry(xrec_v, yrec_v, zrec_v; dt=dtR, t=timeR, nsrc=nsrc)
+opt = Options(mc=false)
 
-recGeometry = Geometry(recpGeometry, recvGeometry)
+if opt.mc
+    # Set up receiver structure
+    recpGeometry = Geometry(xrec_p, yrec_p, zrec_p; dt=dtR, t=timeR, nsrc=nsrc)
+    recvGeometry = Geometry(xrec_v, yrec_v, zrec_v; dt=dtR, t=timeR, nsrc=nsrc)
+
+    recGeometry = Geometry(recpGeometry, recvGeometry)
+else
+    recGeometry = Geometry(xrec_p, yrec_p, zrec_p; dt=dtR, t=timeR, nsrc=nsrc)
+end
 # print("oi")
 
 # # Set up source geometry (cell array with source locations for each shot)
@@ -77,7 +83,7 @@ wavelet = ricker_wavelet(timeS, dtS, f0)
 # ###################################################################################################
 
 # Setup operators'
-F = judiModeling(model, srcGeometry, recGeometry) # tenho que ver e entender essa formação do operador de modelagem
+F = judiModeling(model, srcGeometry, recGeometry; options=opt) # tenho que ver e entender essa formação do operador de modelagem
 # F = judiModeling(model) # tenho que ver e entender essa formação do operador de modelagem
 
 q = judiVector(srcGeometry, wavelet)
