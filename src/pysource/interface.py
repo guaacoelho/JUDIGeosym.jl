@@ -15,7 +15,7 @@ from fields_exprs import wf_as_src
 
 # Forward wrappers Pr*F*Ps'*q
 def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
-                illum=False, fw=True):
+                illum=False, fw=True, mc=False):
     """
     Modeling of a point source with receivers Pr*F*Ps^T*q.
 
@@ -44,7 +44,7 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
         Shot record
     """
     rec, _, I, _ = forward(model, src_coords, rec_coords, wavelet, save=False,
-                           space_order=space_order, f0=f0, illum=illum, fw=fw)
+                           space_order=space_order, f0=f0, illum=illum, fw=fw, mc=mc)
 
     for d in rec:
         print("\n************** começo ***************\n\n")

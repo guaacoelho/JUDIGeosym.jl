@@ -16,7 +16,7 @@ from sources import Receiver
 def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
             qwf=None, return_op=False, freq_list=None, dft_sub=None,
             norm_wf=False, w_fun=None, ws=None, wr=None, t_sub=1, f0=0.015,
-            illum=False, fw=True, **kwargs):
+            illum=False, fw=True, mc=False,  **kwargs):
     """
     Low level propagator, to be used through `interface.py`
     Compute forward wavefield u = A(m)^{-1}*f and related quantities (u(xrcv))
@@ -28,8 +28,7 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     u = wavefield(model, space_order, save=save, nt=nt, t_sub=t_sub, fw=fw)
 
     # Setup source and receiver
-    src, rcv = src_rec(model, u, src_coords, rcv_coords, wavelet, nt)
-
+    src, rcv = src_rec(model, u, src_coords, rcv_coords[0] if mc else rcv_coords, wavelet, nt)
     # Create operator and run
     op = forward_op(model.physical_parameters, model.is_tti, model.is_viscoacoustic,
                     model.is_elastic, space_order, fw, model.spacing, save,
@@ -49,13 +48,13 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     
     if model.is_elastic:
         rec_vx = Receiver(name="rec_vx", grid=model.grid, ntime=nt,
-                          coordinates=rcv_coords)
+                          coordinates=rcv_coords[1] if mc else rcv_coords)
         rec_vz = Receiver(name="rec_vz", grid=model.grid, ntime=nt,
-                          coordinates=rcv_coords)
+                          coordinates=rcv_coords[1] if mc else rcv_coords)
         kw.update(fields_kwargs(rec_vx, rec_vz))
         if model.grid.dim == 3:
                 rec_vy = Receiver(name="rec_vy", grid=model.grid, ntime=nt,
-                                  coordinates=rcv_coords)
+                                  coordinates=rcv_coords[1] if mc else rcv_coords)
                 kw.update(fields_kwargs(rec_vy))
 
     # Output

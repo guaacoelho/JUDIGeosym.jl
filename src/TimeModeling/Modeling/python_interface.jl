@@ -89,7 +89,7 @@ end
 wrapcall_function = wrapcall_grad
 
 # d_obs = Pr*F*Ps'*q
-function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Array, recGeometry::Geometry, recData::Nothing, dm::Nothing, options::JUDIOptions, illum::Bool, fw::Bool)
+function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Array, recGeometry::Geometry, recData::Nothing, dm::Nothing, options::JUDIOptions, illum::Bool, fw::Bool; recvGeometry::Union{Geometry, Nothing}=nothing)
     judilog("Pr*$(_op_str(fw))*Ps'*q")
     # Interpolate input data to computational grid
     dtComp = convert(Float32, modelPy."critical_dt")
@@ -99,10 +99,14 @@ function devito_interface(modelPy::PyObject, srcGeometry::Geometry, srcData::Arr
     src_coords = setup_grid(srcGeometry, modelPy.shape)
     rec_coords = setup_grid(recGeometry, modelPy.shape)
 
+    if options.mc
+        rec_coords = (rec_coords, setup_grid(recvGeometry, modelPy.shape))
+    end
+
     # Devito call
     if modelPy.is_elastic
-        print("entrou aqui!!!\n")
-        return wrapcall_data_isoelastic(ac."forward_rec", modelPy.dim, modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
+        print("Elastic Execution\n")
+        return wrapcall_data_isoelastic(ac."forward_rec", modelPy.dim, modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum, mc=options.mc)
     end
     # print("e também saiu\n")
     return wrapcall_data(ac."forward_rec", modelPy, src_coords, qIn, rec_coords, fw=fw, space_order=options.space_order, f0=options.f0, illum=illum)
