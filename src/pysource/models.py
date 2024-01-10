@@ -228,6 +228,11 @@ class Model(object):
 
         # Additional parameter fields for elastic
         if self._is_elastic:
+            vs = kwargs.get("vs")
+            vp =  kwargs.get("vp")
+
+            self._vp = self._gen_phys_param(vp, 'vp', space_order, is_param=True)
+            self.vs = self._gen_phys_param(vs, 'vs', space_order, is_param=True)
             self.lam = self._gen_phys_param(lam, 'lam', space_order, is_param=True)
             self.mu = self._gen_phys_param(mu, 'mu', space_order, is_param=True)
         # User provided dt
@@ -512,6 +517,8 @@ class Model(object):
         Symbolic representation of the velocity
         vp = sqrt(1 / m)
         """
+        if self._is_elastic:
+            return self._vp
         return sqrt(1 / self.m)
 
     @property

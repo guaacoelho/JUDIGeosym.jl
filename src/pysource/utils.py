@@ -276,7 +276,7 @@ class C_Matrix():
         matrix = C_Matrix._matrix_init(model.dim)
         vp = model.vp
         vs = model.vs
-        rho = model.rho
+        rho = 1/model.irho
 
         subs = subs3D() if model.dim == 3 else subs2D()
         M = matrix.subs(subs)
@@ -309,7 +309,7 @@ class C_Matrix():
         matrix = C_Matrix._matrix_init(model.dim)
         vp = model.vp
         vs = model.vs
-        rho = model.rho
+        rho = 1/model.irho
 
         subs = subs3D() if model.dim == 3 else subs2D()
         return matrix.subs(subs)
@@ -319,7 +319,7 @@ class C_Matrix():
         def d_vp(i, j):
             ii, jj = min(i, j), max(i, j)
             if (ii <= model.dim and jj <= model.dim):
-                return 2*model.rho*model.vp
+                return 2*(1/model.irho)*model.vp
             return 0
 
         d = model.dim*2 + model.dim-2
@@ -346,7 +346,7 @@ class C_Matrix():
                     'C12': -4*rho*vs}
 
         Dvs = C_Matrix._matrix_init(model.dim)
-        rho = model.rho
+        rho = 1/model.irho
         vs = model.vs
 
         subs = subs3D() if model.dim == 3 else subs2D()

@@ -291,6 +291,8 @@ struct IsoElModel{T, N} <: AbstractModel{T, N}
     lam::ModelParam{T, N}
     mu::ModelParam{T, N}
     b::ModelParam{T, N}
+    vs::ModelParam{T, N}
+    vp::ModelParam{T, N}
 end
 
 # Visco-acoustic
@@ -303,7 +305,7 @@ end
 
 _params(m::IsoModel) = ((:m, m.m), (:rho, m.rho))
 _params(m::TTIModel) = ((:m, m.m), (:rho, m.rho), (:epsilon, m.epsilon), (:delta, m.delta), (:theta, m.theta), (:phi, m.phi))
-_params(m::IsoElModel) = ((:lam, m.lam), (:mu, m.mu), (:b, m.b))
+_params(m::IsoElModel) = ((:lam, m.lam), (:mu, m.mu), (:b, m.b), (:vp, m.vp), (:vs, m.vs))
 _params(m::ViscIsoModel) = ((:m, m.m), (:rho, m.rho), (:qp, m.qp))
 
 _mparams(m::AbstractModel) = first.(_params(m))
@@ -361,10 +363,12 @@ function Model(d, o, m::Array{mT, N}; epsilon=nothing, delta=nothing, theta=noth
         if any(!isnothing(p) for p in [epsilon, delta, theta, phi])
             @warn "Thomsen parameters no supported for elastic (vs) ignoring them"
         end
+        vs = PhysicalParameter(convert(Array{T, N}, vs), n, d, o)
+        vp = PhysicalParameter(convert(Array{T, N}, sqrt.(m.^(-1))), n, d, o)
         lambda = PhysicalParameter(convert(Array{T, N}, (m.^(-1) .- T(2) .* vs.^2) .* rho), n, d, o)
         mu = PhysicalParameter(convert(Array{T, N}, vs.^2 .* rho), n, d, o)
         b = isa(rho, Array) ? PhysicalParameter(convert(Array{T, N}, 1 ./ rho), n, d, o) : _scalar(rho, T)
-        return IsoElModel{T, N}(G, lambda, mu, b)
+        return IsoElModel{T, N}(G, lambda, mu, b, vs, vp)
     end
 
     ## Visco

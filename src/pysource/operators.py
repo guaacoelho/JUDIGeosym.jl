@@ -73,7 +73,7 @@ class memoized_func(object):
 
 @memoized_func
 def forward_op(p_params, tti, visco, elas, space_order, fw, spacing, save, t_sub, fs,
-               pt_src, pt_rec):
+               pt_src, pt_rec, par):
     """
     Low level forward operator creation, to be used through `propagator.py`
     Compute forward wavefield u = A(m)^{-1}*f and related quantities (u(xrcv))
@@ -91,7 +91,7 @@ def forward_op(p_params, tti, visco, elas, space_order, fw, spacing, save, t_sub
     u = wavefield(model, space_order, save=save, nt=nt, t_sub=t_sub, fw=fw)
 
     # Set up PDE expression and rearrange
-    pde = wave_kernel(model, u, f0=Constant('f0'), fw=fw)
+    pde = wave_kernel(model, u, f0=Constant('f0'), fw=fw, par=par)
 
     # Setup source and receiver
     g_expr = geom_expr(model, u, src_coords=scords, nt=nt,

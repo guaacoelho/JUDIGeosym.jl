@@ -13,10 +13,10 @@ from sources import Receiver
 
 
 # Forward propagation
-def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
+def forward(model, src_coords, rcv_coords, wavelet, par, space_order=8, save=False,
             qwf=None, return_op=False, freq_list=None, dft_sub=None,
             norm_wf=False, w_fun=None, ws=None, wr=None, t_sub=1, f0=0.015,
-            illum=False, fw=True, mc=False,  **kwargs):
+            illum=False, fw=True, mc=False, **kwargs):
     """
     Low level propagator, to be used through `interface.py`
     Compute forward wavefield u = A(m)^{-1}*f and related quantities (u(xrcv))
@@ -32,7 +32,7 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     # Create operator and run
     op = forward_op(model.physical_parameters, model.is_tti, model.is_viscoacoustic,
                     model.is_elastic, space_order, fw, model.spacing, save,
-                    t_sub, model.fs, src_coords is not None, rcv_coords is not None)
+                    t_sub, model.fs, src_coords is not None, rcv_coords is not None, par)
 
         # Illumination
     I = illumination(u, illum)
@@ -44,7 +44,13 @@ def forward(model, src_coords, rcv_coords, wavelet, space_order=8, save=False,
     fields = fields_kwargs(u, src, rcv, I)
 
     kw.update(fields)
-    kw.update(model.physical_params())
+
+    parameters = model.physical_params()
+    # Pick specifics physical parameters from model unless explicitly provided
+    new_p = {k: v for k, v in parameters.items() if k not in remove_par[par]}
+    print("new_p: ", new_p)
+    kw.update(new_p)
+
     
     if model.is_elastic:
         rec_vx = Receiver(name="rec_vx", grid=model.grid, ntime=nt,
@@ -233,3 +239,6 @@ def forward_grad(model, src_coords, rcv_coords, wavelet, v, space_order=8,
 
     # Output
     return rcv, gradm, summary
+
+remove_par = {'lam-mu': ['vp', 'vs', 'Ip', 'Is'], 'vp-vs-rho': ['lam', 'mu', 'Ip', 'Is'],
+              'Ip-Is-rho': ['lam', 'mu']}

@@ -52,7 +52,8 @@ zrec_v = range(400f0, 400f0, length=nxrec)
 timeR = 1500f0   # receiver recording time [ms]
 dtR = 1.5f0    # receiver sampling interval
 
-opt = Options(mc=false)
+par="lam-mu"
+opt = Options(mc=false, par=par)
 
 if opt.mc
     # Set up receiver structure

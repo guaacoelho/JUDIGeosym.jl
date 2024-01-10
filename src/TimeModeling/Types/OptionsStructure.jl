@@ -23,6 +23,7 @@ mutable struct JUDIOptions
     return_array::Bool
     dt_comp::Union{Float32, Nothing}
     mc::Bool
+    par::String
     f0::Float32
 end
 
@@ -45,6 +46,7 @@ end
         return_array::Bool
         dt_comp::Real
         mc::Bool
+        par::String
         f0::Real
 
 
@@ -100,7 +102,7 @@ All arguments are optional keyword arguments with the following default values:
             num_checkpoints=nothing, checkpoints_maxmem=nothing,
             frequencies=[], isic=false,
             subsampling_factor=1, dft_subsampling_factor=1, return_array=false,
-            dt_comp=nothing, f0=0.015f0)
+            dt_comp=nothing, mc=false, par="lam-mu", f0=0.015f0)
 
 """
 Options(;space_order=8,
@@ -121,6 +123,7 @@ Options(;space_order=8,
          return_array=false,
          dt_comp=nothing,
          mc=false,
+         par="lam-mu",
          f0=0.015f0,
          IC="as") =
 		 JUDIOptions(space_order,
@@ -139,6 +142,7 @@ Options(;space_order=8,
                  return_array,
                  dt_comp,
                  mc,
+                 par,
                  f0)
 
 JUDIOptions(;kw...) = Options(kw...)
