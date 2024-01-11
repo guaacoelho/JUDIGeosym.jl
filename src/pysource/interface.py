@@ -59,17 +59,13 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
         print(minimo)
         print("Norma: ")
         print(norma)
-        
-        # print("\ndobs[1][200]: ")
-        # print(d.data[1][200])
-        # print("\ndobs[1][500]: ")
-        # print(d.data[1][500])
         print("\n************** final ***************\n\n")
 
-    rec_out = (rec[0].data, rec[1].data, rec[2].data)
+    rec_out = tuple(r.data for r in rec)
+
 
     return rec_out
-    # return rec[0].data, getattr(I, "data", None)
+
 
 
 #  Pr*F*Pw'*w

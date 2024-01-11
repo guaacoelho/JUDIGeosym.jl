@@ -34,15 +34,22 @@ function wrapcall_data_isoelastic(func, dim, args...;kw...)
     # The returned array `out` is a Python Row-Major array with dimension (time, rec).
     # Unlike standard array we want to keep this ordering in julia (time first) so we need to
     # make a wrapper around the pointer, to flip the dimension the re-permute the dimensions.
+
     shot1 = out[1]
     shot1 = PermutedDimsArray(unsafe_wrap(Array, shot1.data, reverse(size(shot1))), length(size(shot1)):-1:1)
     shot2 = out[2]
     shot2 = PermutedDimsArray(unsafe_wrap(Array, shot2.data, reverse(size(shot2))), length(size(shot2)):-1:1)
     shot3 = out[3]
     shot3 = PermutedDimsArray(unsafe_wrap(Array, shot3.data, reverse(size(shot3))), length(size(shot3)):-1:1)
-    
-    # Check what to return
-    out = (shot1, shot2, shot3)
+
+    if dim == 3
+        shot4 = out[4]
+        shot4 = PermutedDimsArray(unsafe_wrap(Array, shot4.data, reverse(size(shot4))), length(size(shot4)):-1:1)
+        out = (shot1, shot2, shot3, shot4)
+    else
+        out = (shot1, shot2, shot3)
+    end
+
     return out
 end
 

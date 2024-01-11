@@ -48,7 +48,7 @@ def forward(model, src_coords, rcv_coords, wavelet, par, space_order=8, save=Fal
     parameters = model.physical_params()
     # Pick specifics physical parameters from model unless explicitly provided
     new_p = {k: v for k, v in parameters.items() if k not in remove_par[par]}
-    print("new_p: ", new_p)
+
     kw.update(new_p)
 
     
