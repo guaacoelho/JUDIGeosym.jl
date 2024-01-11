@@ -102,7 +102,7 @@ All arguments are optional keyword arguments with the following default values:
             num_checkpoints=nothing, checkpoints_maxmem=nothing,
             frequencies=[], isic=false,
             subsampling_factor=1, dft_subsampling_factor=1, return_array=false,
-            dt_comp=nothing, mc=false, par="lam-mu", f0=0.015f0)
+            dt_comp=nothing, mc=false, par="vp-vs-rho", f0=0.015f0)
 
 """
 Options(;space_order=8,
@@ -123,7 +123,7 @@ Options(;space_order=8,
          return_array=false,
          dt_comp=nothing,
          mc=false,
-         par="lam-mu",
+         par="vp-vs-rho",
          f0=0.015f0,
          IC="as") =
 		 JUDIOptions(space_order,
