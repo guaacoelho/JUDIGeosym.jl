@@ -15,7 +15,7 @@ from fields_exprs import wf_as_src
 
 # Forward wrappers Pr*F*Ps'*q
 def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
-                illum=False, fw=True, mc=False, par="lam-mu"):
+                illum=False, fw=True, mc=False, par="vp-vs-rho"):
     """
     Modeling of a point source with receivers Pr*F*Ps^T*q.
 
@@ -74,7 +74,7 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
 
 #  Pr*F*Pw'*w
 def forward_rec_w(model, weight, wavelet, rec_coords, space_order=8, f0=0.015,
-                  illum=False, fw=True, par="lam-mu"):
+                  illum=False, fw=True, par="vp-vs-rho"):
     """
     Forward modeling of an extended source with receivers  Pr*F*Pw^T*w
 
@@ -109,7 +109,7 @@ def forward_rec_w(model, weight, wavelet, rec_coords, space_order=8, f0=0.015,
 
 # F*Ps'*q
 def forward_no_rec(model, src_coords, wavelet, space_order=8, f0=0.015, illum=False,
-                   fw=True, par="lam-mu"):
+                   fw=True, par="vp-vs-rho"):
     """
     Forward modeling of a point source without receiver.
 
@@ -141,7 +141,7 @@ def forward_no_rec(model, src_coords, wavelet, space_order=8, f0=0.015, illum=Fa
 
 
 # Pr*F*u
-def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False, fw=True, par="lam-mu"):
+def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False, fw=True, par="vp-vs-rho"):
     """
     Forward modeling of a full wavefield source Pr*F*u.
 
@@ -174,7 +174,7 @@ def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False, f
 
 
 # F*u
-def forward_wf_src_norec(model, u, space_order=8, f0=0.015, illum=False, fw=True, par="lam-mu"):
+def forward_wf_src_norec(model, u, space_order=8, f0=0.015, illum=False, fw=True, par="vp-vs-rho"):
     """
     Forward modeling of a full wavefield source without receiver F*u.
 
