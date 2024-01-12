@@ -46,26 +46,9 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
     rec, _, I, _ = forward(model, src_coords, rec_coords, wavelet, save=False,
                            space_order=space_order, f0=f0, illum=illum, fw=fw, mc=mc, par=par)
 
-    for d in rec:
-        print("\n************** começo ***************\n\n")
-        # print("typeof(dobs): ")
-        # print(type(dobs))
-        maximo = np.max(d.data)
-        minimo = np.min(d.data)
-        norma = np.linalg.norm(d.data)
-        print("Maximo: ")
-        print(maximo)
-        print("Minimo: ")
-        print(minimo)
-        print("Norma: ")
-        print(norma)
-        print("\n************** final ***************\n\n")
-
     rec_out = tuple(r.data for r in rec)
 
-
     return rec_out
-
 
 
 #  Pr*F*Pw'*w
