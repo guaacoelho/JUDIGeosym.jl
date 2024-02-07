@@ -44,7 +44,8 @@ def forward_rec(model, src_coords, wavelet, rec_coords, space_order=8, f0=0.015,
         Shot record
     """
     rec, _, I, _ = forward(model, src_coords, rec_coords, wavelet, save=False,
-                           space_order=space_order, f0=f0, illum=illum, fw=fw, mc=mc, par=par)
+                           space_order=space_order, f0=f0, illum=illum, fw=fw,
+                           mc=mc, par=par)
 
     rec_out = tuple(r.data for r in rec)
 
@@ -120,7 +121,8 @@ def forward_no_rec(model, src_coords, wavelet, space_order=8, f0=0.015, illum=Fa
 
 
 # Pr*F*u
-def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False, fw=True, par="vp-vs-rho"):
+def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False,
+                   fw=True, par="vp-vs-rho"):
     """
     Forward modeling of a full wavefield source Pr*F*u.
 
@@ -153,7 +155,8 @@ def forward_wf_src(model, u, rec_coords, space_order=8, f0=0.015, illum=False, f
 
 
 # F*u
-def forward_wf_src_norec(model, u, space_order=8, f0=0.015, illum=False, fw=True, par="vp-vs-rho"):
+def forward_wf_src_norec(model, u, space_order=8, f0=0.015, illum=False, fw=True,
+                         par="vp-vs-rho"):
     """
     Forward modeling of a full wavefield source without receiver F*u.
 

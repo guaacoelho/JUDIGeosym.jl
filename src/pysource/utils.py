@@ -11,7 +11,6 @@ from devito.tools import as_tuple
 from devito.types.tensor import (TensorFunction, TensorTimeFunction,
                                  VectorFunction, VectorTimeFunction, tens_func)
 
-import numpy as np
 from sympy import symbols, Matrix, ones
 
 

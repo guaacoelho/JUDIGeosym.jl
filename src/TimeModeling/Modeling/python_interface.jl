@@ -65,11 +65,6 @@ function wrapcall_data(func, args...;kw...)
     shot = PermutedDimsArray(unsafe_wrap(Array, shot.data, reverse(size(shot))), length(size(shot)):-1:1)
     # Check what to return
     out = tup ? (shot, out[2]) : shot
-    # print("\nPrint dentro wrap depois shot")
-    # print("\nout: ")
-    # print(typeof(out))
-    # print("\nout[1]: ")
-    # print(typeof(out[1]))
 
     return out
 end

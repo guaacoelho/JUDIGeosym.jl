@@ -17,16 +17,17 @@ def src_rec(model, u, src_coords=None, rec_coords=None, wavelet=None, nt=None):
             src = wavelet
         else:
             src = PointSource(name="src%s" % namef, grid=model.grid, ntime=nt,
-                            coordinates=src_coords)
+                              coordinates=src_coords)
             src.data[:] = wavelet[:] if wavelet is not None else 0.
     rcv = None
     if rec_coords is not None:
         rcv = Receiver(name="rcv%s" % namef, grid=model.grid, ntime=nt,
-                    coordinates=rec_coords)
+                       coordinates=rec_coords)
     return src, rcv
 
 
-def geom_expr(model, u, src_coords=None, rec_coords=None, wavelet=None, fw=True, nt=None, recv_coords=None):
+def geom_expr(model, u, src_coords=None, rec_coords=None, wavelet=None,
+              fw=True, nt=None, recv_coords=None):
     """
     Generates the source injection and receiver interpolation.
     This function is fully abstracted and does not care whether this is a
@@ -76,14 +77,14 @@ def geom_expr(model, u, src_coords=None, rec_coords=None, wavelet=None, fw=True,
 
             if recv_coords is None:
                 raise Exception
-            
+
             rec_vx = Receiver(name="rec_vx", grid=model.grid, ntime=nt,
-                    coordinates=recv_coords)
+                              coordinates=recv_coords)
             rec_vz = Receiver(name="rec_vz", grid=model.grid, ntime=nt,
-                    coordinates=recv_coords)
+                              coordinates=recv_coords)
             if model.grid.dim == 3:
                 rec_vy = Receiver(name="rec_vy", grid=model.grid, ntime=nt,
-                    coordinates=recv_coords)
+                                  coordinates=recv_coords)
 
             v = u[0]
             rec_term_vx = rec_vx.interpolate(expr=v[0])
